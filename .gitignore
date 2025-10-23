@@ -3,4 +3,21 @@ node_modules/
 .env.local
 dist/
 postgres_data/
+# Node build outputs
+node_modules
+dist
+.next
+
+# Mac junk
+.DS_Store
+
+# Real env files (never commit secrets)
+*.env
+*.env.local
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Postgres local data
+postgres_data/
 

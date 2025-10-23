@@ -1,40 +1,50 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 
-type User = { id: number; name: string; email: string };
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
 
 export default function Home() {
     const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
+    // Fetch users from your backend
     useEffect(() => {
-        fetch(`${API}/api/users`)
-            .then((r) => {
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.json();
-            })
-            .then(setUsers)
-            .catch((e) => setError(String(e)));
-    }, [API]);
+        async function fetchUsers() {
+            try {
+                const res = await fetch('http://localhost:3001/api/users');
+                if (!res.ok) {
+                    throw new Error(`Error: ${res.status}`);
+                }
+                const data = await res.json();
+                setUsers(data);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchUsers();
+    }, []);
+
+    if (loading) return <p>Loading users...</p>;
+    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
     return (
         <main style={{ padding: 24 }}>
-            <h1>Frontend</h1>
-            <p>Backend URL: {API}</p>
-
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-
-            <h2>Users</h2>
+            <h1>Users</h1>
             {users.length === 0 ? (
-                <p>No users yet.</p>
+                <p>No users found.</p>
             ) : (
                 <ul>
-                    {users.map((u) => (
-                        <li key={u.id}>
-                            {u.name} — {u.email}
+                    {users.map((user) => (
+                        <li key={user.id}>
+                            <strong>{user.name}</strong> — {user.email}
                         </li>
                     ))}
                 </ul>
